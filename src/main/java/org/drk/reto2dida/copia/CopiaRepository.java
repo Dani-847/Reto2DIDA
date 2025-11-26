@@ -20,9 +20,9 @@ public class CopiaRepository implements Repository<Copia> {
     public Copia save(Copia entity) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            session.persist(entity);
+            Copia managed = session.merge(entity);
             session.getTransaction().commit();
-            return entity;
+            return managed;
         }
     }
 
@@ -56,6 +56,12 @@ public class CopiaRepository implements Repository<Copia> {
         }
     }
 
+    public Optional<Copia> findById(Integer id) {
+        try (Session session = sessionFactory.openSession()) {
+            return Optional.ofNullable(session.find(Copia.class, id));
+        }
+    }
+
     @Override
     public List<Copia> findAll() {
         try (Session session = sessionFactory.openSession()) {
@@ -76,6 +82,15 @@ public class CopiaRepository implements Repository<Copia> {
                             "from Copia c where c.user = :user", Copia.class)
                     .setParameter("user", user)
                     .list();
+        }
+    }
+
+    public Copia update(Copia entity) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Copia managed = session.merge(entity);
+            session.getTransaction().commit();
+            return managed;
         }
     }
 }

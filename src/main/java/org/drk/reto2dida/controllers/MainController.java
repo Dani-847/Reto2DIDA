@@ -248,6 +248,10 @@ public class MainController implements Initializable {
         if (anioStr.isPresent() && !anioStr.get().trim().isEmpty()) {
             try {
                 anio = Integer.parseInt(anioStr.get().trim());
+                if (anio < 1800 || anio > 2100) {
+                    JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "Año inválido", "El año debe estar entre 1800 y 2100.");
+                    return;
+                }
             } catch (NumberFormatException e) {
                 JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "Año inválido", "El año debe ser un número.");
                 return;
