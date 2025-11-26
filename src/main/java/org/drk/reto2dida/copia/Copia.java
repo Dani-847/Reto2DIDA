@@ -33,9 +33,9 @@ public class Copia implements Serializable {
 
     @Override
     public String toString() {
-        return "Copy{" +
+        return "Copia{" +
                 "id=" + id +
-                ", movie=" + (movie != null ? movie.getTitle() : "null") +
+                ", movie=" + (movie != null ? movie.getTitulo() : "null") +
                 ", user=" + (user != null ? user.getEmail() : "null") +
                 ", estado='" + estado + '\'' +
                 ", soporte='" + soporte + '\'' +
