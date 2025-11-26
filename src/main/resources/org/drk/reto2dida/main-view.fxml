@@ -10,39 +10,82 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.drk.reto2dida.controllers.MainController">
-   <center>
-      <VBox alignment="CENTER" maxWidth="700.0" spacing="20.0">
-          <padding>
-              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-          </padding>
-      
-             <Label fx:id="welcomeText" text="Listado de Copias">
-            <font>
-               <Font size="25.0" />
-            </font>
-         </Label>
-         <Label fx:id="lblUsuario" text="Label" />
-         <TableView fx:id="tabla" prefHeight="200.0" prefWidth="200.0">
-           <columns>
-             <TableColumn fx:id="cId" prefWidth="50.0" text="ID" />
-               <TableColumn fx:id="cTitulo" prefWidth="150.0" text="Película" />
-               <TableColumn fx:id="cAnio" prefWidth="60.0" text="Año" />
-               <TableColumn fx:id="cEstado" prefWidth="80.0" text="Estado" />
-               <TableColumn fx:id="cSoporte" prefWidth="80.0" text="Soporte" />
-           </columns>
-            <columnResizePolicy>
-               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-            </columnResizePolicy>
-         </TableView>
-         <FlowPane alignment="CENTER" hgap="20.0">
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.ComboBox?>
+<BorderPane xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.drk.reto2dida.controllers.MainController">
+    <left>
+        <VBox spacing="10" prefWidth="550">
             <children>
-               <Button fx:id="btnAñadir" mnemonicParsing="false" onAction="#añadir" text="Añadir Copia" />
-               <Button fx:id="btnEditar" mnemonicParsing="false" onAction="#editar" text="Editar Copia" />
-               <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#borrar" text="Borrar Copia" />
-               <Button fx:id="btnAñadirPelicula" mnemonicParsing="false" onAction="#añadirPelicula" text="Añadir Película (Admin)" />
+                <Label text="Películas disponibles">
+                    <font><Font size="22"/></font>
+                </Label>
+                <TableView fx:id="tablaPeliculas" prefHeight="500.0">
+                    <columns>
+                        <TableColumn fx:id="colPeliId" text="ID" prefWidth="60"/>
+                        <TableColumn fx:id="colPeliTitulo" text="Título" prefWidth="180"/>
+                        <TableColumn fx:id="colPeliAnio" text="Año" prefWidth="70"/>
+                        <TableColumn fx:id="colPeliGenero" text="Género" prefWidth="120"/>
+                        <TableColumn fx:id="colPeliDirector" text="Director" prefWidth="120"/>
+                    </columns>
+                </TableView>
+                <HBox spacing="10" fx:id="boxAdmin" alignment="CENTER">
+                    <children>
+                        <Button fx:id="btnAddPeli" text="Añadir película" onAction="#onAddPelicula"/>
+                        <Button fx:id="btnEditPeli" text="Editar película" onAction="#onEditPelicula"/>
+                        <Button fx:id="btnDelPeli" text="Eliminar película" onAction="#onDeletePelicula"/>
+                    </children>
+                </HBox>
             </children>
-         </FlowPane>
-      </VBox>
-   </center>
+            <padding><Insets top="15" left="15" right="10" bottom="15"/></padding>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="8" prefWidth="350">
+            <children>
+                <Label fx:id="lblUsuarioActual">
+                    <font><Font size="18"/></font>
+                </Label>
+                <TableView fx:id="tablaCopias" prefHeight="250">
+                    <columns>
+                        <TableColumn fx:id="colCopiaId" text="ID" prefWidth="50"/>
+                        <TableColumn fx:id="colCopiaTitulo" text="Película" prefWidth="140"/>
+                        <TableColumn fx:id="colCopiaEstado" text="Estado" prefWidth="80"/>
+                        <TableColumn fx:id="colCopiaSoporte" text="Soporte" prefWidth="80"/>
+                    </columns>
+                </TableView>
+                <TitledPane text="Crear nueva copia" expanded="true">
+                    <content>
+                        <VBox spacing="6">
+                            <children>
+                                <Label text="Selecciona una película a la izquierda"/>
+                                <HBox spacing="10">
+                                    <children>
+                                        <Label text="Estado"/>
+                                        <ComboBox fx:id="cmbEstado" prefWidth="140"/>
+                                    </children>
+                                </HBox>
+                                <HBox spacing="10">
+                                    <children>
+                                        <Label text="Soporte"/>
+                                        <ComboBox fx:id="cmbSoporte" prefWidth="140"/>
+                                    </children>
+                                </HBox>
+                                <Button text="Crear copia" onAction="#onCreateCopia"/>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+                <HBox spacing="10" alignment="CENTER">
+                    <children>
+                        <Button text="Editar copia" onAction="#onEditCopia"/>
+                        <Button text="Eliminar copia" onAction="#onDeleteCopia"/>
+                    </children>
+                </HBox>
+            </children>
+            <padding><Insets top="15" left="10" right="15" bottom="15"/></padding>
+        </VBox>
+    </center>
 </BorderPane>

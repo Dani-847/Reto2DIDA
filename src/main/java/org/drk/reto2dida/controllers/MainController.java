@@ -1,13 +1,16 @@
+// java
 package org.drk.reto2dida.controllers;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.layout.HBox;
 import org.drk.reto2dida.copia.Copia;
-import org.drk.reto2dida.copia.CopiaService;
+import org.drk.reto2dida.copia.CopiaRepository;
 import org.drk.reto2dida.pelicula.Pelicula;
 import org.drk.reto2dida.pelicula.PeliculaRepository;
 import org.drk.reto2dida.session.SimpleSessionService;
@@ -16,272 +19,181 @@ import org.drk.reto2dida.utils.DataProvider;
 import org.drk.reto2dida.utils.JavaFXUtil;
 
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
-    @FXML
-    private Label welcomeText;
-    @FXML
-    private TableColumn<Copia, String> cTitulo;
-    @FXML
-    private TableColumn<Copia, String> cEstado;
-    @FXML
-    private TableColumn<Copia, String> cSoporte;
-    @FXML
-    private TableColumn<Copia, String> cAnio;
-    @FXML
-    private TableView<Copia> tabla;
-    @FXML
-    private TableColumn<Copia, String> cId;
-    @FXML
-    private Label lblUsuario;
-    @FXML
-    private Button btnBorrar;
-    @FXML
-    private Button btnAñadir;
-    @FXML
-    private Button btnEditar;
-    @FXML
-    private Button btnAñadirPelicula;
 
-    SimpleSessionService simpleSessionService = new SimpleSessionService();
-    CopiaService copiaService = new CopiaService();
-    PeliculaRepository peliculaRepository = new PeliculaRepository(DataProvider.getSessionFactory());
+    @FXML private TableView<Pelicula> tablaPeliculas;
+    @FXML private TableColumn<Pelicula,String> colPeliId;
+    @FXML private TableColumn<Pelicula,String> colPeliTitulo;
+    @FXML private TableColumn<Pelicula,String> colPeliAnio;
+    @FXML private TableColumn<Pelicula,String> colPeliGenero;
+    @FXML private TableColumn<Pelicula,String> colPeliDirector;
+
+    @FXML private TableView<Copia> tablaCopias;
+    @FXML private TableColumn<Copia,String> colCopiaId;
+    @FXML private TableColumn<Copia,String> colCopiaTitulo;
+    @FXML private TableColumn<Copia,String> colCopiaEstado;
+    @FXML private TableColumn<Copia,String> colCopiaSoporte;
+
+    @FXML private Label lblUsuarioActual;
+    @FXML private HBox boxAdmin;
+
+    @FXML private ComboBox<String> cmbEstado;
+    @FXML private ComboBox<String> cmbSoporte;
+
+    @FXML private Button btnAddPeli;
+    @FXML private Button btnEditPeli;
+    @FXML private Button btnDelPeli;
+
+    private final SimpleSessionService sessionService = new SimpleSessionService();
+    private final PeliculaRepository peliculaRepository = new PeliculaRepository(DataProvider.getSessionFactory());
+    private final CopiaRepository copiaRepository = new CopiaRepository(DataProvider.getSessionFactory());
+
+    private User active;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        User activeUser = simpleSessionService.getActive();
-        lblUsuario.setText("Copias del usuario: " + activeUser.getEmail());
-
-        // Hide admin button if user is not admin
-        if (activeUser.getIsAdmin() == null || !activeUser.getIsAdmin()) {
-            btnAñadirPelicula.setVisible(false);
-            btnAñadirPelicula.setManaged(false);
-        }
-
-        cId.setCellValueFactory((row) -> {
-            return new SimpleStringProperty(String.valueOf(row.getValue().getId()));
-        });
-        cTitulo.setCellValueFactory((row) -> {
-            Pelicula movie = row.getValue().getMovie();
-            return new SimpleStringProperty(movie != null ? movie.getTitulo() : "-");
-        });
-        cAnio.setCellValueFactory((row) -> {
-            Pelicula movie = row.getValue().getMovie();
-            if (movie == null || movie.getAnio() == null) {
-                return new SimpleStringProperty("-");
-            }
-            return new SimpleStringProperty(String.valueOf(movie.getAnio()));
-        });
-        cEstado.setCellValueFactory((row) -> {
-            return new SimpleStringProperty(row.getValue().getEstado());
-        });
-        cSoporte.setCellValueFactory((row) -> {
-            return new SimpleStringProperty(row.getValue().getSoporte());
-        });
-
-        tabla.getSelectionModel().selectedItemProperty().addListener(showCopiaDetail());
-
+    public void initialize(URL url, ResourceBundle rb) {
+        active = sessionService.getActive();
+        setupTables();
+        loadPeliculas();
         loadCopias();
+        lblUsuarioActual.setText(formatUser(active));
+
+        boolean admin = isAdmin(active);
+        boxAdmin.setVisible(admin);
+        boxAdmin.setManaged(admin);
+
+        String winTitle = "Gestor de copias y películas" + (admin ? " (admin)" : "");
+        if (JavaFXUtil.getStage() != null) JavaFXUtil.getStage().setTitle(winTitle);
+
+        cmbEstado.setItems(FXCollections.observableArrayList("bueno","nuevo","regular","dañado"));
+        cmbEstado.getSelectionModel().selectFirst();
+        cmbSoporte.setItems(FXCollections.observableArrayList("DVD","BluRay","Digital","VHS"));
+        cmbSoporte.getSelectionModel().selectFirst();
+    }
+
+    private void setupTables() {
+        colPeliId.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getId())));
+        colPeliTitulo.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getTitulo()));
+        colPeliAnio.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getAnio() != null ? r.getValue().getAnio().toString() : "-"));
+        colPeliGenero.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getGenero()));
+        colPeliDirector.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getDirector()));
+
+        colCopiaId.setCellValueFactory(r -> new SimpleStringProperty(String.valueOf(r.getValue().getId())));
+        colCopiaTitulo.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getMovie() != null ? r.getValue().getMovie().getTitulo() : "-"));
+        colCopiaEstado.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getEstado()));
+        colCopiaSoporte.setCellValueFactory(r -> new SimpleStringProperty(r.getValue().getSoporte()));
+
+        // Fijar modo de selección correcto
+        tablaPeliculas.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        tablaCopias.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+    }
+
+    private void loadPeliculas() {
+        tablaPeliculas.setItems(FXCollections.observableArrayList(peliculaRepository.findAll()));
     }
 
     private void loadCopias() {
-        tabla.getItems().clear();
-        User activeUser = simpleSessionService.getActive();
-        List<Copia> copias = copiaService.findByUser(activeUser);
-        tabla.getItems().addAll(copias);
+        tablaCopias.setItems(FXCollections.observableArrayList(copiaRepository.findByUser(active)));
     }
 
-    private ChangeListener<Copia> showCopiaDetail() {
-        return (obs, old, newCopia) -> {
-            if (newCopia != null) {
-                Pelicula movie = newCopia.getMovie();
-                String details = "Copia ID: " + newCopia.getId() + "\n" +
-                        "Estado: " + newCopia.getEstado() + "\n" +
-                        "Soporte: " + newCopia.getSoporte() + "\n\n" +
-                        "Película: " + (movie != null ? movie.getTitulo() : "N/A") + "\n" +
-                        "Año: " + (movie != null && movie.getAnio() != null ? movie.getAnio() : "N/A") + "\n" +
-                        "Género: " + (movie != null ? movie.getGenero() : "N/A") + "\n" +
-                        "Director: " + (movie != null ? movie.getDirector() : "N/A");
-                JavaFXUtil.showModal(
-                        Alert.AlertType.INFORMATION,
-                        "Detalle de Copia",
-                        movie != null ? movie.getTitulo() : "Copia",
-                        details
-                );
-            }
-        };
+    private String formatUser(User u) {
+        return isAdmin(u) ? u.getEmail() + " *" : u.getEmail();
     }
 
-    @FXML
-    public void borrar(ActionEvent actionEvent) {
-        Copia selectedCopia = tabla.getSelectionModel().getSelectedItem();
-        if (selectedCopia == null) {
-            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Atención", "Sin selección", "Seleccione una copia para borrar.");
-            return;
-        }
-
-        User activeUser = simpleSessionService.getActive();
-        boolean deleted = copiaService.deleteCopia(selectedCopia, activeUser);
-        if (deleted) {
-            loadCopias();
-            JavaFXUtil.showModal(Alert.AlertType.INFORMATION, "Éxito", "Copia eliminada", "La copia ha sido eliminada correctamente.");
-        } else {
-            JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "No autorizado", "No puede eliminar copias que no le pertenecen.");
-        }
-    }
-
-    @FXML
-    public void añadir(ActionEvent actionEvent) {
-        List<Pelicula> peliculas = peliculaRepository.findAll();
-        if (peliculas.isEmpty()) {
-            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Atención", "Sin películas", "No hay películas disponibles. Un administrador debe añadir películas primero.");
-            return;
-        }
-
-        // Create dialog to select movie
-        ChoiceDialog<Pelicula> movieDialog = new ChoiceDialog<>(peliculas.get(0), peliculas);
-        movieDialog.setTitle("Añadir Copia");
-        movieDialog.setHeaderText("Seleccione una película");
-        movieDialog.setContentText("Película:");
-        Optional<Pelicula> selectedMovie = movieDialog.showAndWait();
-
-        if (selectedMovie.isEmpty()) {
-            return;
-        }
-
-        // Create dialog to select estado
-        ChoiceDialog<String> estadoDialog = new ChoiceDialog<>("bueno", "bueno", "dañado");
-        estadoDialog.setTitle("Añadir Copia");
-        estadoDialog.setHeaderText("Seleccione el estado de la copia");
-        estadoDialog.setContentText("Estado:");
-        Optional<String> selectedEstado = estadoDialog.showAndWait();
-
-        if (selectedEstado.isEmpty()) {
-            return;
-        }
-
-        // Create dialog to select soporte
-        ChoiceDialog<String> soporteDialog = new ChoiceDialog<>("DVD", "DVD", "Blu-ray", "VHS");
-        soporteDialog.setTitle("Añadir Copia");
-        soporteDialog.setHeaderText("Seleccione el soporte de la copia");
-        soporteDialog.setContentText("Soporte:");
-        Optional<String> selectedSoporte = soporteDialog.showAndWait();
-
-        if (selectedSoporte.isEmpty()) {
-            return;
-        }
-
-        User activeUser = simpleSessionService.getActive();
-        copiaService.createCopia(activeUser, selectedMovie.get(), selectedEstado.get(), selectedSoporte.get());
-        loadCopias();
-        JavaFXUtil.showModal(Alert.AlertType.INFORMATION, "Éxito", "Copia añadida", "La copia ha sido añadida correctamente.");
-    }
-
-    @FXML
-    public void editar(ActionEvent actionEvent) {
-        Copia selectedCopia = tabla.getSelectionModel().getSelectedItem();
-        if (selectedCopia == null) {
-            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Atención", "Sin selección", "Seleccione una copia para editar.");
-            return;
-        }
-
-        // Select new estado
-        ChoiceDialog<String> estadoDialog = new ChoiceDialog<>(selectedCopia.getEstado(), "bueno", "dañado");
-        estadoDialog.setTitle("Editar Copia");
-        estadoDialog.setHeaderText("Seleccione el nuevo estado");
-        estadoDialog.setContentText("Estado:");
-        Optional<String> newEstado = estadoDialog.showAndWait();
-
-        if (newEstado.isEmpty()) {
-            return;
-        }
-
-        // Select new soporte
-        ChoiceDialog<String> soporteDialog = new ChoiceDialog<>(selectedCopia.getSoporte(), "DVD", "Blu-ray", "VHS");
-        soporteDialog.setTitle("Editar Copia");
-        soporteDialog.setHeaderText("Seleccione el nuevo soporte");
-        soporteDialog.setContentText("Soporte:");
-        Optional<String> newSoporte = soporteDialog.showAndWait();
-
-        if (newSoporte.isEmpty()) {
-            return;
-        }
-
-        User activeUser = simpleSessionService.getActive();
-        Copia updated = copiaService.updateCopia(selectedCopia, newEstado.get(), newSoporte.get(), activeUser);
-        if (updated != null) {
-            loadCopias();
-            JavaFXUtil.showModal(Alert.AlertType.INFORMATION, "Éxito", "Copia actualizada", "La copia ha sido actualizada correctamente.");
-        } else {
-            JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "No autorizado", "No puede editar copias que no le pertenecen.");
-        }
-    }
-
-    @FXML
-    public void añadirPelicula(ActionEvent actionEvent) {
-        User activeUser = simpleSessionService.getActive();
-        if (activeUser.getIsAdmin() == null || !activeUser.getIsAdmin()) {
-            JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "No autorizado", "Solo los administradores pueden añadir películas.");
-            return;
-        }
-
-        // Dialog for titulo
-        TextInputDialog tituloDialog = new TextInputDialog();
-        tituloDialog.setTitle("Añadir Película");
-        tituloDialog.setHeaderText("Introduce el título de la película");
-        tituloDialog.setContentText("Título:");
-        Optional<String> titulo = tituloDialog.showAndWait();
-        if (titulo.isEmpty() || titulo.get().trim().isEmpty()) {
-            return;
-        }
-
-        // Dialog for año
-        TextInputDialog anioDialog = new TextInputDialog();
-        anioDialog.setTitle("Añadir Película");
-        anioDialog.setHeaderText("Introduce el año de la película");
-        anioDialog.setContentText("Año:");
-        Optional<String> anioStr = anioDialog.showAndWait();
-        Integer anio = null;
-        if (anioStr.isPresent() && !anioStr.get().trim().isEmpty()) {
+    private boolean isAdmin(User u) {
+        try {
+            var m = u.getClass().getMethod("getRol");
+            Object rol = m.invoke(u);
+            return rol != null && "admin".equalsIgnoreCase(rol.toString());
+        } catch (Exception ignore) {
             try {
-                anio = Integer.parseInt(anioStr.get().trim());
-                if (anio < 1800 || anio > 2100) {
-                    JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "Año inválido", "El año debe estar entre 1800 y 2100.");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                JavaFXUtil.showModal(Alert.AlertType.ERROR, "Error", "Año inválido", "El año debe ser un número.");
-                return;
+                var m2 = u.getClass().getMethod("isAdmin");
+                Object v = m2.invoke(u);
+                return v instanceof Boolean && (Boolean) v;
+            } catch (Exception e2) {
+                return false;
             }
         }
+    }
 
-        // Dialog for genero
-        TextInputDialog generoDialog = new TextInputDialog();
-        generoDialog.setTitle("Añadir Película");
-        generoDialog.setHeaderText("Introduce el género de la película");
-        generoDialog.setContentText("Género:");
-        Optional<String> genero = generoDialog.showAndWait();
-        if (genero.isEmpty() || genero.get().trim().isEmpty()) {
+    @FXML
+    public void onCreateCopia(ActionEvent e) {
+        Pelicula selected = tablaPeliculas.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            JavaFXUtil.showModal(Alert.AlertType.WARNING, "Copia", "Película no seleccionada", "Selecciona una película primero.");
             return;
         }
+        Copia c = new Copia();
+        c.setMovie(selected);
+        c.setUser(active);
+        c.setEstado(cmbEstado.getValue());
+        c.setSoporte(cmbSoporte.getValue());
+        copiaRepository.save(c);
+        loadCopias();
+    }
 
-        // Dialog for director
-        TextInputDialog directorDialog = new TextInputDialog();
-        directorDialog.setTitle("Añadir Película");
-        directorDialog.setHeaderText("Introduce el director de la película");
-        directorDialog.setContentText("Director:");
-        Optional<String> director = directorDialog.showAndWait();
+    @FXML
+    public void onEditCopia(ActionEvent e) {
+        Copia copia = tablaCopias.getSelectionModel().getSelectedItem();
+        if (copia == null) return;
+        if (!copia.getUser().getId().equals(active.getId())) {
+            JavaFXUtil.showModal(Alert.AlertType.ERROR, "Editar", "No permitido", "Solo tus copias.");
+            return;
+        }
+        copia.setEstado("dañado".equalsIgnoreCase(copia.getEstado()) ? "bueno" : "dañado");
+        copiaRepository.update(copia);
+        tablaCopias.refresh();
+    }
 
-        Pelicula pelicula = new Pelicula();
-        pelicula.setTitulo(titulo.get().trim());
-        pelicula.setAnio(anio);
-        pelicula.setGenero(genero.get().trim());
-        pelicula.setDirector(director.isPresent() ? director.get().trim() : null);
+    @FXML
+    public void onDeleteCopia(ActionEvent e) {
+        Copia copia = tablaCopias.getSelectionModel().getSelectedItem();
+        if (copia == null) return;
+        if (!copia.getUser().getId().equals(active.getId())) {
+            JavaFXUtil.showModal(Alert.AlertType.ERROR, "Eliminar", "No permitido", "Solo tus copias.");
+            return;
+        }
+        copiaRepository.delete(copia);
+        loadCopias();
+    }
 
-        peliculaRepository.save(pelicula);
-        JavaFXUtil.showModal(Alert.AlertType.INFORMATION, "Éxito", "Película añadida", "La película '" + pelicula.getTitulo() + "' ha sido añadida correctamente.");
+    @FXML
+    public void onAddPelicula(ActionEvent e) {
+        if (!isAdmin(active)) return;
+        Pelicula p = new Pelicula();
+        p.setTitulo("Nueva película " + System.currentTimeMillis());
+        p.setAnio(LocalDateTime.now().getYear());
+        p.setGenero("Desconocido");
+        p.setDirector("N/A");
+        peliculaRepository.save(p);
+        loadPeliculas();
+    }
+
+    @FXML
+    public void onEditPelicula(ActionEvent e) {
+        if (!isAdmin(active)) return;
+        Pelicula sel = tablaPeliculas.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
+        TextInputDialog dlg = new TextInputDialog(sel.getTitulo());
+        dlg.setTitle("Editar película");
+        dlg.setHeaderText("Modificar título");
+        dlg.setContentText("Título:");
+        dlg.showAndWait().ifPresent(nuevo -> {
+            sel.setTitulo(nuevo);
+            peliculaRepository.update(sel);
+            tablaPeliculas.refresh();
+        });
+    }
+
+    @FXML
+    public void onDeletePelicula(ActionEvent e) {
+        if (!isAdmin(active)) return;
+        Pelicula sel = tablaPeliculas.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
+        peliculaRepository.delete(sel);
+        loadPeliculas();
     }
 }

@@ -25,6 +25,15 @@ public class PeliculaRepository implements Repository<Pelicula> {
         }
     }
 
+    public Pelicula update(Pelicula entity) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Pelicula managed = session.merge(entity);
+            session.getTransaction().commit();
+            return managed;
+        }
+    }
+
     @Override
     public Optional<Pelicula> delete(Pelicula entity) {
         try (Session session = sessionFactory.openSession()) {

@@ -1,7 +1,9 @@
 package org.drk.reto2dida.user;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.drk.reto2dida.copia.Copia;
 
 import java.io.Serializable;
@@ -11,6 +13,8 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="user")
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +24,7 @@ public class User implements Serializable {
     private String password;
 
     @Column(name="is_admin")
-    private Boolean isAdmin;
+    private Boolean is_admin;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Copia> copias = new ArrayList<>();
