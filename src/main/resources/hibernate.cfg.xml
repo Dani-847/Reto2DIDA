@@ -25,7 +25,7 @@
         <!-- Mapeo de clases de entidad (añade tus clases aquí) -->
         <mapping class="org.drk.reto2dida.pelicula.Pelicula"/>
         <mapping class="org.drk.reto2dida.user.User"/>
-        <!-- <mapping class="com.tuempresa.modelo.Producto"/> -->
+        <mapping class="org.drk.reto2dida.copia.Copia"/>
 
     </session-factory>
 </hibernate-configuration>

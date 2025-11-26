@@ -12,12 +12,12 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.drk.reto2dida.controllers.MainController">
    <center>
-      <VBox alignment="CENTER" maxWidth="600.0" spacing="20.0">
+      <VBox alignment="CENTER" maxWidth="700.0" spacing="20.0">
           <padding>
               <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
           </padding>
       
-             <Label fx:id="welcomeText" text="Listado de videojuegos">
+             <Label fx:id="welcomeText" text="Listado de Copias">
             <font>
                <Font size="25.0" />
             </font>
@@ -25,11 +25,11 @@
          <Label fx:id="lblUsuario" text="Label" />
          <TableView fx:id="tabla" prefHeight="200.0" prefWidth="200.0">
            <columns>
-             <TableColumn fx:id="cId" prefWidth="75.0" text="id" />
-               <TableColumn fx:id="cTitulo" prefWidth="75.0" text="Titulo" />
-               <TableColumn fx:id="cPlataforma" prefWidth="75.0" text="Plataforma" />
-               <TableColumn fx:id="cAño" prefWidth="75.0" text="Antigüedad" />
-               <TableColumn fx:id="cDescripcion" prefWidth="75.0" text="Descripción" />
+             <TableColumn fx:id="cId" prefWidth="50.0" text="ID" />
+               <TableColumn fx:id="cTitulo" prefWidth="150.0" text="Película" />
+               <TableColumn fx:id="cAnio" prefWidth="60.0" text="Año" />
+               <TableColumn fx:id="cEstado" prefWidth="80.0" text="Estado" />
+               <TableColumn fx:id="cSoporte" prefWidth="80.0" text="Soporte" />
            </columns>
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -37,8 +37,10 @@
          </TableView>
          <FlowPane alignment="CENTER" hgap="20.0">
             <children>
-               <Button fx:id="btnAñadir" mnemonicParsing="false" onAction="#añadir" text="Añadir Juego" />
-               <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#borrar" text="Borrar Juego" />
+               <Button fx:id="btnAñadir" mnemonicParsing="false" onAction="#añadir" text="Añadir Copia" />
+               <Button fx:id="btnEditar" mnemonicParsing="false" onAction="#editar" text="Editar Copia" />
+               <Button fx:id="btnBorrar" mnemonicParsing="false" onAction="#borrar" text="Borrar Copia" />
+               <Button fx:id="btnAñadirPelicula" mnemonicParsing="false" onAction="#añadirPelicula" text="Añadir Película (Admin)" />
             </children>
          </FlowPane>
       </VBox>

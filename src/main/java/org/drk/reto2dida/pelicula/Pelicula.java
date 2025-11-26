@@ -21,7 +21,7 @@ public class Pelicula implements Serializable {
     @Column(name = "titulo", nullable = false, length = 255)
     private String titulo;
 
-    @Column(name = "año", nullable = false)
+    @Column(name = "año")
     private Integer anio;
 
     @Column(name = "genero", nullable = false, length = 100)
