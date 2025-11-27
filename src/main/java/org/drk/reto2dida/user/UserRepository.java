@@ -38,7 +38,9 @@ public class UserRepository implements Repository<User> {
 
     @Override
     public List<User> findAll() {
-        return List.of();
+        try(Session session=sessionFactory.openSession()){
+            return session.createQuery("from User",User.class).list();
+        }
     }
 
     @Override

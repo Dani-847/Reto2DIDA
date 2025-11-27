@@ -5,49 +5,60 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.layout.HBox?>
-<BorderPane prefHeight="326.0" prefWidth="426.0"
-            xmlns="http://javafx.com/javafx/24.0.1"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.drk.reto2dida.controllers.LoginController">
-    <center>
-        <VBox alignment="CENTER" spacing="15.0">
-            <children>
-                <Label text="Login">
-                    <font><Font size="30"/></font>
-                </Label>
-                <GridPane hgap="10" vgap="10">
-                    <columnConstraints>
-                        <ColumnConstraints prefWidth="120"/>
-                        <ColumnConstraints prefWidth="260"/>
-                    </columnConstraints>
-                    <children>
-                        <Label text="Usuario"/>
-                        <ComboBox fx:id="cmbUsuarios" promptText="Selecciona usuario" GridPane.columnIndex="1"/>
-                        <Label text="Correo" GridPane.rowIndex="1"/>
-                        <TextField fx:id="txtCorreo" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Label text="Contraseña" GridPane.rowIndex="2"/>
-                        <TextField fx:id="txtContraseña" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                    </children>
-                </GridPane>
-                <HBox spacing="20">
-                    <children>
-                        <Button text="Entrar" onAction="#entrar"/>
-                        <Button text="Salir" onAction="#Salir"/>
-                    </children>
-                </HBox>
-                <Label fx:id="info" />
-            </children>
-        </VBox>
-    </center>
-</BorderPane>
+
+<VBox alignment="CENTER" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.drk.reto2dida.controllers.LoginController">
+   <children>
+          <Label alignment="CENTER" text="Login">
+              <font>
+            <Font name="System Bold" size="38.0" />
+         </font>
+         <opaqueInsets>
+            <Insets bottom="10.0" />
+         </opaqueInsets>
+          </Label>
+      <GridPane alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="208.0" minWidth="10.0" prefWidth="137.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="307.0" minWidth="10.0" prefWidth="289.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+                  <Label contentDisplay="CENTER" text="Correo" />
+                  <TextField fx:id="txtCorreo" prefHeight="25.0" prefWidth="737.0" GridPane.columnIndex="1" />
+                  <Label text="Contraseña" GridPane.rowIndex="1" />
+                  <TextField fx:id="txtContraseña" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
+          <HBox alignment="CENTER" prefHeight="9.0" prefWidth="426.0" spacing="20">
+              <children>
+                  <ComboBox fx:id="cmbUsuarios" prefHeight="25.0" prefWidth="134.0" promptText="(Admin) All users" />
+                  <Button onAction="#entrar" text="Entrar">
+               <opaqueInsets>
+                  <Insets bottom="10.0" />
+               </opaqueInsets>
+            </Button>
+                  <Button onAction="#Salir" text="Salir" />
+              </children>
+         <opaqueInsets>
+            <Insets bottom="10.0" top="10.0" />
+         </opaqueInsets>
+         <padding>
+            <Insets top="10.0" />
+         </padding>
+          </HBox>
+          <Label fx:id="info" />
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>
